@@ -79,6 +79,8 @@ class KNearestNeighbor(object):
 
                 pass
 
+                dists[i, j] = np.sqrt(np.sum(np.square(X[i]-self.X_train[j])))
+
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
 
@@ -102,6 +104,8 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+
+            dists[i, :] = np.sqrt(np.sum(np.square(X[i]-self.X_train[:]), axis=1))
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -132,6 +136,13 @@ class KNearestNeighbor(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         pass
+
+        dists = np.multiply(np.dot(X,self.X_train.T),-2)
+        sq1 = np.sum(np.square(X),axis=1,keepdims=True)
+        sq2 = np.sum(np.square(self.X_train),axis=1)
+        dists = np.add(dists,sq1)
+        dists = np.add(dists,sq2)
+        dists = np.sqrt(dists)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -165,6 +176,9 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+            
+            tmp = np.argsort(dists[i])[:k]
+            closest_y = self.y_train[tmp]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
@@ -177,6 +191,8 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+
+            y_pred[i] = np.argmax(np.bincount(closest_y))
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 

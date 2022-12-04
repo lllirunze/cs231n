@@ -67,6 +67,13 @@ class LinearClassifier(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+        
+            # 在num_train中，随机选取大小为batch_size的数据
+            i = np.random.choice(a=num_train, size=batch_size)
+            # 获取所选取的i个样本及其对应的特征
+            X_batch = X[i,:]
+            # 获取所选取的i个样本的类标签
+            y_batch = y[i]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -82,6 +89,9 @@ class LinearClassifier(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+            
+            # 将参数沿着梯度的反方向移动，从而使这批数据上的损失减小
+            self.W -= learning_rate*grad
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -112,6 +122,9 @@ class LinearClassifier(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         pass
+    
+        scores = X.dot(self.X)
+        y_pred = np.argmax(scores, axis=1)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return y_pred
@@ -132,6 +145,26 @@ class LinearClassifier(object):
         - gradient with respect to self.W; an array of the same shape as W
         """
         pass
+    
+        loss = 0.0
+        dW = np.zeros(self.W.shape)
+        
+        # 获取样本范围
+        num_train = X_batch.shape[0]
+        
+        # 计算损失
+        scores = X_batch.dot(self.W)
+        correct_scores = scores[np.arange(num_train), y_batch]
+        margins = np.maximum(0, scores-correct_scores+1)
+        loss += np.sum(margins)
+        loss /= num_train
+        loss += reg * np.sum(self.W*self.W)
+        
+        # 计算梯度
+        margins[margins>0] = 1
+        row_num = -np.sum(margins, 1)
+        margins[np.arange(num_train), y] = row_num
+        dW += np.dot(X_batch.T, margins)/num_train + reg*self.W
 
 
 class LinearSVM(LinearClassifier):

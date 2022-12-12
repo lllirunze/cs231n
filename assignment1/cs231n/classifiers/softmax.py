@@ -35,7 +35,34 @@ def softmax_loss_naive(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
-
+    
+    # N: 获取样本数量
+    num_train = X.shape[0]
+    # C: 获取样本类别
+    num_classes = W.shape[1]
+    
+    for i in range(num_train):
+        # score_i.shape = [1, C]
+        score_i = X[i].dot(W)
+        exp_score_i = np.exp(score_i)
+        sum_score_i = np.sum(exp_score_i)
+        exp_score_i /= sum_score_i
+        
+        correct_score_i = exp_score_i[y[i]]
+        # 计算样本的损失
+        loss += (-np.log(correct_score_i))
+        # 计算梯度
+        for j in range(num_classes):
+            if j != y[i]:
+                dW[:,j] += exp_scores_i[j]*X[i]
+            else:
+                dW[:,j] += (exp_scores_i[y[i]]-1)*X[i]
+                
+    loss /= num_train
+    loss += reg*np.sum(W*W)
+    dW /= num_train
+    dW += reg*W
+    
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     return loss, dW

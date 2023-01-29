@@ -55,8 +55,12 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
-
+        # pass
+        self.params['W1'] = np.random.normal(loc=0.0, scale=weight_scale, size=(input_dim, hidden_dim))
+        self.params['b1'] = np.zeros((hidden_dim, ))
+        self.params['W2'] = np.random.normal(loc=0.0, scale=weight_scale, size=(hidden_dim, num_classes))
+        self.params['b2'] = np.zeros((num_classes, ))
+        
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -88,7 +92,16 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # pass
+        W1 = self.params['W1']
+        b1 = self.params['b1']
+        W2 = self.params['W2']
+        b2 = self.params['b2']
+
+        affine1_out, affine1_cache = affine_forward(X, W1, b1)
+        relu_out, relu_cache = relu_forward(affine1_out)
+        affine2_out, affine2_cache = affine_forward(relu_out, W2, b2)
+        scores = affine2_out
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -112,7 +125,22 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # pass
+
+        loss, d_affine2_out = softmax_loss(scores, y)
+        loss += 0.5 * self.reg * ( np.sum(np.square(W1)) + np.sum(np.square(W2)) ) #+ np.sum(np.square(b1)) + np.sum(np.square(b2)) ) # No need of L2 regularization for bias       
+        d_relu_out,dw2,db2  = affine_backward(d_affine2_out, affine2_cache)
+        d_affine1_out       = relu_backward(d_relu_out, relu_cache)
+        d_X,dw1,db1         = affine_backward(d_affine1_out, affine1_cache)
+        
+        # Add regularization part for dw2 and dw1
+        dw1 += self.reg * W1
+        dw2 += self.reg * W2
+        
+        grads['W1'] = dw1
+        grads['b1'] = db1
+        grads['W2'] = dw2
+        grads['b2'] = db2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

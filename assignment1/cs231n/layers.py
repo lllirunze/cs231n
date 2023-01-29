@@ -21,7 +21,7 @@ def affine_forward(x, w, b):
     - out: output, of shape (N, M)
     - cache: (x, w, b)
     """
-    out = None
+    # out = None
     ###########################################################################
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
@@ -29,6 +29,8 @@ def affine_forward(x, w, b):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+
+    out = np.reshape(x, (x.shape[0], -1)) @ w + b
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -63,6 +65,14 @@ def affine_backward(dout, cache):
 
     pass
 
+    N = x.shape[0]
+    M = w.shape[1]
+    
+    db = np.sum(dout, axis=0)
+    dx = dout.dot(w.transpose())
+    dx = dx.reshape(x.shape)
+    dw = x.reshape((N, -1)).transpose().dot(dout)
+
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -88,6 +98,9 @@ def relu_forward(x):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+
+    out = x.copy()
+    out[x<0] = 0
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -115,6 +128,10 @@ def relu_backward(dout, cache):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+
+    dx = np.zeros(x.shape)
+    dx[x>0] = 1
+    dx = np.multiply(dx, dout)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -775,6 +792,26 @@ def svm_loss(x, y):
 
     pass
 
+    N = x.shape[0]
+    C = x.shape[1]
+    X = x.copy()
+    
+    loss = 0.0
+    x_index = np.arange(0, N)
+    target_score = X[x_index, y]
+    X -= target_score.reshape((-1, 1))
+    X += 1
+    X[x_index, y] = 0
+    
+    loss += np.sum(X*(X>0))
+    loss /= N
+    
+    grad_L = 1.0
+    grad_l1 = grad_L / N
+    dx = np.ones((N, C))*grad_l1
+    dx = dx*(X>0)
+    dx[x_index, y] = -np.sum(dx, axis=1)
+
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -804,6 +841,32 @@ def softmax_loss(x, y):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+
+    N = x.shape[0]
+    C = x.shape[1]
+    S = x.copy()    
+    S_exp = np.exp(S)
+    S_exp_sum = np.sum(S_exp, axis=1)
+    
+    x_index = np.arange(0, N)
+    syi = S_exp[x_index, y]
+    s = syi / S_exp_sum
+    s_loss = -np.log(s)
+    loss = np.sum(s_loss) / N
+
+    grad_L = 1
+    grad_L /= N
+    grad_s_loss = np.ones((N, 1))*grad_L
+    grad_s = grad_s_loss * (-1/s.reshape((-1, 1)))
+    # print(grad_s)
+    grad_S_exp = -syi.reshape((-1, 1)).dot(np.ones((1, C)))
+    temp = S_exp_sum - syi
+    grad_S_exp[x_index, y] = temp
+    temp = S_exp_sum * S_exp_sum
+    grad_S_exp = grad_S_exp / temp.reshape((-1, 1))
+    grad_S_exp *= grad_s
+    grad_S = grad_S_exp * S_exp
+    dx = grad_S
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################

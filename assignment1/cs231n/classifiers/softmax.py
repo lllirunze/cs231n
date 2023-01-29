@@ -54,9 +54,9 @@ def softmax_loss_naive(W, X, y, reg):
         # 计算梯度
         for j in range(num_classes):
             if j != y[i]:
-                dW[:,j] += exp_scores_i[j]*X[i]
+                dW[:,j] += exp_score_i[j]*X[i]
             else:
-                dW[:,j] += (exp_scores_i[y[i]]-1)*X[i]
+                dW[:,j] += (exp_score_i[y[i]]-1)*X[i]
                 
     loss /= num_train
     loss += reg*np.sum(W*W)
@@ -87,6 +87,29 @@ def softmax_loss_vectorized(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+
+    # N: 获取样本数量
+    num_train = X.shape[0]
+    
+    # scores.shape: [N, C]
+    scores = X.dot(W)
+    exp_scores = np.exp(scores)
+    # sum_scores.shape: [N,]
+    sum_scores = np.sum(exp_scores, axis=1)
+    exp_scores /= sum_scores[:, np.newaxis]
+    
+    # 计算样本损失
+    loss_matrix = -np.log(exp_scores[range(num_train),y])
+    loss += np.sum(loss_matrix)
+    # 计算梯度
+    # 取正确标签处，减一。注：必须使用range(num_train)而非':'
+    exp_scores[range(num_train),y] -= 1
+    dW += np.dot(X.T, exp_scores)  # 3073x500 * 500x10 = 3073x10
+
+    loss /= num_train
+    loss += reg * np.sum(W*W)
+    dW /= num_train
+    dW +=reg *W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
